@@ -21,6 +21,7 @@
 
 namespace Ninject.MockingKernel
 {
+    using Ninject.Planning.Bindings;
     using Ninject.Syntax;
 
     /// <summary>
@@ -38,7 +39,7 @@ namespace Ninject.MockingKernel
         {
             var bindingConfiguration = builder.BindingConfiguration;
             bindingConfiguration.ProviderCallback = builder.Kernel.Components.Get<IMockProviderCallbackProvider>().GetCreationCallback();
-            return builder as IBindingWhenInNamedWithOrOnSyntax<T>;
+            return new BindingConfigurationBuilder<T>(builder.BindingConfiguration, null, builder.Kernel);
         }
     }
 }
