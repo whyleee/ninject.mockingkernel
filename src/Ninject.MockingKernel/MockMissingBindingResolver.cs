@@ -58,16 +58,14 @@ namespace Ninject.MockingKernel
         {
             var service = request.Service;
             IList<IBinding> bindingList = new List<IBinding>();
-            if (this.TypeIsInterfaceOrAbstract(service))
-            {
-                bindingList.Add(
-                    new Binding(service)
-                    {
-                        ProviderCallback = this.mockProviderCallbackProvider.GetCreationCallback(),
-                        ScopeCallback = ctx => StandardScopeCallbacks.Singleton,
-                        IsImplicit = true
-                    });
-            }
+
+            bindingList.Add(
+                new Binding(service)
+                {
+                    ProviderCallback = this.mockProviderCallbackProvider.GetCreationCallback(),
+                    ScopeCallback = ctx => StandardScopeCallbacks.Singleton,
+                    IsImplicit = true
+                });
 
             return bindingList;
         }

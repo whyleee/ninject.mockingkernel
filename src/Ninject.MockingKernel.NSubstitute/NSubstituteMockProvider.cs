@@ -19,6 +19,9 @@
 // </copyright>
 //-------------------------------------------------------------------------------
 
+using System.Linq;
+using System.Reflection;
+
 namespace Ninject.MockingKernel.NSubstitute
 {
     using System;
@@ -61,7 +64,35 @@ namespace Ninject.MockingKernel.NSubstitute
         /// </returns>
         public object Create(IContext context)
         {
-            return Substitute.For(new[] { context.Request.Service }, null);
+            var service = context.Request.Service;
+
+            if (service.IsInterface || service.IsAbstract)
+            {
+                return Substitute.For(new[] {service}, null);
+            }
+
+            var constructor = SelectConstructor(service);
+            var arguments = constructor.GetParameters()
+                .Select(parameter => context.Kernel.Get(parameter.ParameterType)).ToArray();
+
+            return Substitute.For(new[] {service}, arguments);
+        }
+
+        /// <summary>
+        /// Selects most valuable constructor in the service type.
+        /// </summary>
+        /// <param name="service">The service.</param>
+        /// <returns>Most valuable constructor from the service type.</returns>
+        private ConstructorInfo SelectConstructor(Type service)
+        {
+            var constructor = service.GetConstructors().OrderByDescending(c => c.GetParameters().Length).FirstOrDefault();
+
+            if (constructor == null)
+            {
+                throw new ArgumentException(string.Format("Error resolving service '{0}': no constructors", service.FullName));
+            }
+
+            return constructor;
         }
     }
 }
